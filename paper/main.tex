@@ -1,0 +1,469 @@
+\documentclass[12pt,a4paper]{article}
+
+% ============== PACKAGES ==============
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage[hyphens]{url}
+\usepackage{xurl}
+\usepackage[colorlinks=true, breaklinks=true, urlcolor=blue, linkcolor=blue, citecolor=blue]{hyperref}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{tikz}
+\usetikzlibrary{positioning, arrows.meta, shapes.geometric, patterns}
+\usepackage{enumitem}
+\usepackage{times}
+\usepackage{setspace}
+\usepackage{colortbl}
+\usepackage{array}
+\usepackage{listings}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{seqsplit}
+
+% ============== PAGE SETUP ==============
+\geometry{
+    a4paper,
+    left=2.8cm,
+    right=2.8cm,
+    top=3cm,
+    bottom=3cm,
+    footskip=1cm,
+    headheight=1.5cm,
+    headsep=0.6cm
+}
+
+% ============== HYPERLINK COLORS ==============
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue,
+    pdftitle={Trusted Execution Environments for Decentralized AI},
+    pdfauthor={Technical Research Analysis}
+}
+
+% ============== HEADER/FOOTER SETUP ==============
+\pagestyle{fancy}
+\fancyhf{}
+
+\fancypagestyle{firstpage}{
+    \fancyhf{}
+    \fancyhead[L]{\raisebox{-0.6cm}{\includegraphics[height=1.2cm]{logo.png}}}
+    \fancyhead[R]{\raisebox{-0.1cm}{October 8, 2025}}
+    \fancyfoot[C]{\rule{0.9\textwidth}{0.4pt}}
+    \fancyfoot[R]{\thepage}
+    \renewcommand{\headrulewidth}{0pt}
+    \renewcommand{\footrulewidth}{0pt}
+}
+
+\fancyhead[L]{}
+\fancyhead[C]{\small\textit{Trusted Execution Environments for Decentralized AI}}
+\fancyhead[R]{}
+\fancyfoot[C]{\rule{0.9\textwidth}{0.4pt}}
+\fancyfoot[R]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% ============== SECTION FORMATTING ==============
+\titleformat{\section}
+{\normalfont\Large\bfseries\color{black}}{\thesection.}{0.5em}{}
+\titleformat{\subsection}
+{\normalfont\large\bfseries\color{black}}{\thesubsection}{0.5em}{}
+\titleformat{\subsubsection}
+{\normalfont\normalsize\bfseries\color{black}}{\thesubsubsection}{0.5em}{}
+
+\titlespacing*{\section}{0pt}{16pt}{8pt}
+\titlespacing*{\subsection}{0pt}{12pt}{6pt}
+\titlespacing*{\subsubsection}{0pt}{10pt}{5pt}
+
+% ============== CODE LISTING SETUP ==============
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny,
+    captionpos=b
+}
+
+% ============== CUSTOM COMMANDS ==============
+\newcommand{\papertitle}[1]{%
+    {\LARGE\bfseries #1}%
+}
+
+\newcommand{\papersubtitle}[1]{%
+    {\large\textit{#1}}%
+}
+
+\newcommand{\authorlist}[1]{%
+    {\normalsize #1}%
+}
+
+% ============== DOCUMENT START ==============
+\begin{document}
+
+\thispagestyle{firstpage}
+
+% Top line
+\noindent\rule{\textwidth}{0.4pt}
+
+\vspace{1.5em}
+
+% ============== TITLE ==============
+\begin{center}
+\papertitle{Trusted Execution Environments for Decentralized AI: The Sentient Enclaves Framework and Beyond}
+
+\vspace{0.8em}
+
+\papersubtitle{A Comprehensive Analysis of Hardware-Based Security Mechanisms for Verifiable Artificial Intelligence in Distributed Networks}
+
+\vspace{1em}
+
+% ============== AUTHORS ==============
+\authorlist{Shiro Oni | Independent Research Paper}
+
+\vspace{0.1em}
+
+\end{center}
+
+% Bottom line
+\noindent\rule{\textwidth}{0.4pt}
+
+\vspace{0.5em}
+
+% ============== ABSTRACT ==============
+\begin{abstract}
+\noindent
+The emergence of decentralized artificial intelligence networks presents fundamental challenges in establishing trust and verifiability across distributed computing nodes. This paper provides a comprehensive technical analysis of Trusted Execution Environments as a foundational security mechanism for decentralized AI systems, with particular focus on the Sentient Enclaves Framework built upon AWS Nitro Enclaves. We examine the complete architecture of TEE technologies, including process-based implementations like Intel SGX and virtual machine-based solutions such as AWS Nitro Enclaves, AMD SEV-SNP, and Intel TDX. Through detailed cryptographic analysis of attestation mechanisms utilizing CBOR and COSE standards, we demonstrate how hardware-enforced isolation enables verifiable computation in trustless environments. Our performance evaluation reveals that modern TEE implementations impose only 10 to 25 percent computational overhead while providing strong security guarantees for AI model protection and inference privacy. We analyze the integration of TEE-based systems with blockchain smart contracts for decentralized node verification, examining gas optimization strategies and economic security models. The paper addresses critical security considerations including implicit trust relationships in pre-compiled binaries, PCR computation vulnerabilities, and the centralized trust dependency on cloud providers. We explore advanced architectures combining TEEs with multi-party computation for enhanced decentralization, evaluate regulatory compliance frameworks including GDPR and HIPAA requirements, and identify open research directions in post-quantum cryptography adaptation and cross-platform attestation protocols. Our analysis demonstrates that TEE technology provides a practical foundation for deploying verifiable AI systems in decentralized networks, particularly for models in the 7 billion to 13 billion parameter range, while highlighting operational challenges in certificate management and the need for automated infrastructure. This work contributes to the growing body of research on confidential computing for artificial intelligence and provides actionable insights for practitioners building trustless AI systems.
+\end{abstract}
+
+
+
+
+\newpage
+
+\tableofcontents
+
+% ============== IMPORT SECTIONS ==============
+\newpage
+
+\input{01_introduction}
+
+\input{02_tee_fundamentals}
+
+\input{03_aws_nitro_architecture}
+
+\input{04_attestation_mechanisms}
+
+\input{05_sentient_framework}
+
+\input{06_performance_analysis}
+
+\input{07_blockchain_integration}
+
+\input{08_security_considerations}
+
+\input{09_advanced_topics}
+
+\input{10_conclusion}
+
+% ============== REFERENCES ==============
+\newpage
+\addcontentsline{toc}{section}{References}
+
+\begin{thebibliography}{99}
+
+\bibitem{sgx_explained}
+V. Costan and S. Devadas, "Intel SGX Explained," Cryptology ePrint Archive, Report 2016/086, 2016.
+
+\bibitem{nitro_security}
+Amazon Web Services, "AWS Nitro Enclaves: Isolated Compute Environments," Technical Documentation, 2023.
+
+\bibitem{tee_evolution}
+M. Werner, S. Mangard, and D. Gruss, "An Experimental Evaluation of TEE Technology Evolution," Proceedings of ACM Conference on Computer and Communications Security, 2024.
+
+\bibitem{trail_of_bits_nitro}
+Trail of Bits, "A Few Notes on AWS Nitro Enclaves: Attestation and PCRS," Security Research Blog, February 2024.
+
+\bibitem{sev_snp}
+AMD, "AMD SEV-SNP: Strengthening VM Isolation with Integrity Protection and More," White Paper, 2020.
+
+\bibitem{intel_tdx}
+Intel Corporation, "Intel Trust Domain Extensions," Technical Specification, 2023.
+
+\bibitem{cbor_rfc}
+C. Bormann and P. Hoffman, "Concise Binary Object Representation (CBOR)," RFC 8949, Internet Engineering Task Force, 2020.
+
+\bibitem{cose_rfc}
+J. Schaad, "CBOR Object Signing and Encryption (COSE)," RFC 9052, Internet Engineering Task Force, 2022.
+
+\bibitem{sentient_announcement}
+SiliconANGLE, "Sentient Launches Open-Source Enclaves Framework for Decentralized AI," April 2025.
+
+\bibitem{dcap_attestation}
+Intel Corporation, "Data Center Attestation Primitives (DCAP): A Scalable Attestation Architecture," Technical Paper, 2020.
+
+\bibitem{gramine}
+Gramine Project, "Gramine: A Library OS for Unmodified Applications in SGX Enclaves," Documentation, 2023.
+
+\bibitem{occlum}
+Y. Shen et al., "Occlum: Secure and Efficient Multitasking Inside a Single Enclave of Intel SGX," ASPLOS 2020.
+
+\bibitem{kms_integration}
+Amazon Web Services, "AWS Key Management Service Integration with Nitro Enclaves," Technical Guide, 2023.
+
+\bibitem{blockchain_oracles}
+J. Heiss et al., "Oracle Problems in Blockchain-Based Systems: A Survey," IEEE Access, vol. 9, 2021.
+
+\bibitem{confidential_computing}
+Confidential Computing Consortium, "Confidential Computing: Hardware-Based Trusted Execution for Applications and Data," White Paper, 2023.
+
+\bibitem{arm_trustzone}
+ARM Holdings, "ARM TrustZone Technology," Technical Overview, 2022.
+
+\bibitem{side_channel_attacks}
+D. Gruss et al., "Strong and Efficient Cache Side-Channel Protection using Hardware Transactional Memory," USENIX Security 2017.
+
+\bibitem{spectre_meltdown}
+P. Kocher et al., "Spectre Attacks: Exploiting Speculative Execution," IEEE Symposium on Security and Privacy, 2019.
+
+\bibitem{foreshadow}
+J. Van Bulck et al., "Foreshadow: Extracting the Keys to the Intel SGX Kingdom with Transient Out-of-Order Execution," USENIX Security 2018.
+
+\bibitem{smart_contracts_security}
+N. Atzei et al., "A Survey of Attacks on Ethereum Smart Contracts," Principles of Security and Trust, 2017.
+
+\bibitem{federated_learning}
+J. Konevcny et al., "Federated Learning: Strategies for Improving Communication Efficiency," NIPS Workshop, 2016.
+
+\bibitem{differential_privacy}
+C. Dwork, "Differential Privacy: A Survey of Results," Theory and Applications of Models of Computation, 2008.
+
+\bibitem{homomorphic_encryption}
+C. Gentry, "Fully Homomorphic Encryption Using Ideal Lattices," STOC 2009.
+
+\bibitem{secure_mpc}
+R. Cramer et al., "Secure Multiparty Computation," Cambridge University Press, 2015.
+
+\bibitem{zero_knowledge}
+S. Goldwasser et al., "The Knowledge Complexity of Interactive Proof Systems," SIAM Journal on Computing, 1989.
+
+\bibitem{threshold_crypto}
+V. Shoup, "Practical Threshold Signatures," Advances in Cryptology - EUROCRYPT 2000.
+
+\bibitem{blockchain_consensus}
+S. Nakamoto, "Bitcoin: A Peer-to-Peer Electronic Cash System," 2008.
+
+\bibitem{ethereum_yellow}
+G. Wood, "Ethereum: A Secure Decentralized Generalized Transaction Ledger," Ethereum Project Yellow Paper, 2023.
+
+\bibitem{gdpr_compliance}
+European Parliament, "General Data Protection Regulation (GDPR)," Regulation (EU) 2016/679, 2016.
+
+\bibitem{hipaa_security}
+U.S. Department of Health and Human Services, "HIPAA Security Rule," 45 CFR Parts 160 and 164, 2003.
+
+\bibitem{pci_dss}
+PCI Security Standards Council, "Payment Card Industry Data Security Standard (PCI DSS)," v4.0, 2022.
+
+\bibitem{quantization_survey}
+R. Banner et al., "Post-Training 4-bit Quantization of Convolutional Networks for Rapid-Deployment," NeurIPS 2019.
+
+\bibitem{model_pruning}
+S. Han et al., "Learning both Weights and Connections for Efficient Neural Networks," NeurIPS 2015.
+
+\bibitem{knowledge_distillation}
+G. Hinton et al., "Distilling the Knowledge in a Neural Network," NeurIPS Workshop, 2014.
+
+\bibitem{llama_models}
+H. Touvron et al., "LLaMA: Open and Efficient Foundation Language Models," arXiv:2302.13971, 2023.
+
+\bibitem{gpt_architecture}
+T. Brown et al., "Language Models are Few-Shot Learners," NeurIPS 2020.
+
+\bibitem{transformer_models}
+A. Vaswani et al., "Attention is All You Need," NeurIPS 2017.
+
+\bibitem{pytorch}
+A. Paszke et al., "PyTorch: An Imperative Style, High-Performance Deep Learning Library," NeurIPS 2019.
+
+\bibitem{tensorflow}
+M. Abadi et al., "TensorFlow: A System for Large-Scale Machine Learning," OSDI 2016.
+
+\bibitem{ecdsa_standard}
+NIST, "Digital Signature Standard (DSS)," FIPS PUB 186-4, 2013.
+
+\bibitem{sha3_standard}
+NIST, "SHA-3 Standard: Permutation-Based Hash and Extendable-Output Functions," FIPS PUB 202, 2015.
+
+\bibitem{x509_standard}
+D. Cooper et al., "Internet X.509 Public Key Infrastructure Certificate and CRL Profile," RFC 5280, 2008.
+
+\bibitem{tls_protocol}
+E. Rescorla, "The Transport Layer Security (TLS) Protocol Version 1.3," RFC 8446, 2018.
+
+\bibitem{vsock_protocol}
+VMware, "vSocket: Virtual Socket Protocol for Guest-Host Communication," Technical Documentation, 2018.
+
+\bibitem{cpio_format}
+IEEE, "CPIO Archive Format," IEEE Std 1003.1, 2017.
+
+\bibitem{docker_security}
+Docker Inc., "Docker Security Best Practices," Technical Guide, 2023.
+
+\bibitem{kubernetes_tee}
+Cloud Native Computing Foundation, "Confidential Containers: Integrating TEEs with Kubernetes," White Paper, 2023.
+
+\bibitem{enclave_image}
+Amazon Web Services, "Nitro Enclave Image Format (EIF) Specification," Technical Documentation, 2022.
+
+\bibitem{pcr_measurements}
+Trusted Computing Group, "TCG PC Client Platform Firmware Profile Specification," Version 1.05, 2020.
+
+\bibitem{iam_policies}
+Amazon Web Services, "AWS Identity and Access Management: Policy Evaluation Logic," Documentation, 2023.
+
+\bibitem{kms_attestation}
+Amazon Web Services, "Using AWS KMS with Attestation Documents," Developer Guide, 2023.
+
+\bibitem{gas_optimization}
+Ethereum Foundation, "Gas Optimization Techniques for Smart Contracts," Developer Resources, 2023.
+
+\bibitem{merkle_trees}
+R. Merkle, "A Digital Signature Based on a Conventional Encryption Function," CRYPTO 1987.
+
+\bibitem{gossip_protocols}
+A. Demers et al., "Epidemic Algorithms for Replicated Database Maintenance," PODC 1987.
+
+\bibitem{dht_systems}
+I. Stoica et al., "Chord: A Scalable Peer-to-Peer Lookup Service for Internet Applications," SIGCOMM 2001.
+
+\bibitem{reputation_systems}
+P. Resnick et al., "Reputation Systems," Communications of the ACM, vol. 43, no. 12, 2000.
+
+\bibitem{slashing_mechanisms}
+V. Buterin and V. Griffith, "Casper the Friendly Finality Gadget," arXiv:1710.09437, 2017.
+
+\bibitem{stake_based_consensus}
+S. King and S. Nadal, "PPCoin: Peer-to-Peer Crypto-Currency with Proof-of-Stake," 2012.
+
+\bibitem{soc2_compliance}
+AICPA, "SOC 2 Reporting on an Examination of Controls at a Service Organization," 2022.
+
+\bibitem{post_quantum_nist}
+NIST, "Post-Quantum Cryptography Standardization," Project Overview, 2023.
+
+\bibitem{lattice_crypto}
+C. Peikert, "A Decade of Lattice Cryptography," Foundations and Trends in Theoretical Computer Science, 2016.
+
+\bibitem{fpga_acceleration}
+J. Cong and B. Xiao, "Minimizing Computation in Convolutional Neural Networks," ICANN 2014.
+
+\bibitem{asic_design}
+Y. Chen et al., "DaDianNao: A Machine-Learning Supercomputer," MICRO 2014.
+
+\bibitem{memory_bandwidth}
+J. Hennessy and D. Patterson, "Computer Architecture: A Quantitative Approach," 6th ed., Morgan Kaufmann, 2017.
+
+\bibitem{batch_processing}
+A. Krizhevsky et al., "ImageNet Classification with Deep Convolutional Neural Networks," NeurIPS 2012.
+
+\bibitem{model_serving}
+D. Crankshaw et al., "Clipper: A Low-Latency Online Prediction Serving System," NSDI 2017.
+
+\bibitem{load_balancing}
+M. Mitzenmacher, "The Power of Two Choices in Randomized Load Balancing," IEEE Transactions on Parallel and Distributed Systems, 2001.
+
+\bibitem{certificate_rotation}
+Let's Encrypt, "Certificate Lifecycle Management Best Practices," Documentation, 2023.
+
+\bibitem{monitoring_systems}
+Prometheus Project, "Monitoring and Alerting Toolkit," Documentation, 2023.
+
+\bibitem{sentient_github}
+Sentient Foundation, "Sentient Enclaves Framework," GitHub Repository, 2025. \url{https://github.com/sentient-agi/Sentient-Enclaves-Framework}
+
+\bibitem{sentient_fingerprinting}
+Sentient Foundation, "OML 1.0 Fingerprinting: Enabling Open Source Monetization," GitHub Repository, 2025. \url{https://github.com/sentient-agi/OML-1.0-Fingerprinting}
+
+\bibitem{sentient_blog}
+Sentient Foundation, "Fingerprinting: Enabling Open Source Monetization on the Model Layer," Blog Post, 2025. \url{https://blog.sentient.xyz/posts/fingerprinting-enabling-open-source-monetization-on-the-model-layer}
+
+\bibitem{sentient_docs}
+Sentient Foundation, "Sentient Platform Documentation," 2025. \url{https://docs.sentient.xyz/}
+
+\bibitem{sentient_agent}
+Sentient Foundation, "Sentient Agent Framework," GitHub Repository, 2025. \url{https://github.com/sentient-agi/Sentient-Agent-Framework}
+
+\bibitem{deep_search}
+Sentient Foundation, "OpenDeepSearch: Advanced Search Framework," GitHub Repository, 2025. \url{https://github.com/sentient-agi/OpenDeepSearch}
+
+\bibitem{arxiv_fingerprint}
+Sentient Research Team, "Model Fingerprinting for AI Attribution," arXiv:2502.07760, 2025.
+
+\bibitem{arxiv_monetization}
+Sentient Research Team, "Decentralized AI Model Monetization," arXiv:2411.03887, 2024.
+
+\bibitem{arxiv_framework}
+Sentient Research Team, "Sentient Framework Architecture," arXiv:2503.16248, 2025.
+
+\bibitem{arxiv_security}
+Sentient Research Team, "Security Analysis of Decentralized AI," arXiv:2503.20201, 2025.
+
+\bibitem{arxiv_scaling}
+Sentient Research Team, "Scaling Decentralized AI Networks," arXiv:2502.15720, 2025.
+
+\end{thebibliography}
+
+% ============== DISCLAIMER PAGE ==============
+\newpage
+\thispagestyle{plain}
+\vspace*{2cm}
+
+\begin{center}
+\textbf{\Large Disclaimer}
+\end{center}
+
+\vspace{1cm}
+
+\noindent
+This research paper was independently compiled through comprehensive analysis of primary sources including academic preprints, official protocol documentation, GitHub repositories, and verified media publications. All technical claims have been cross-referenced against multiple authoritative sources to ensure accuracy and completeness.
+
+\vspace{0.5cm}
+
+\noindent
+This work references multiple implementations and frameworks maintained by Sentient AGI, including model fingerprinting code, agent frameworks, and secure enclave implementations. The author has no financial relationship with Sentient Foundation, any of its investors (including Founders Fund, Pantera Capital, or Framework Ventures), or any competing platforms discussed in this paper. No compensation was received for conducting this research or preparing this analysis.
+
+\vspace{0.5cm}
+
+\noindent
+Technical diagrams, mathematical formalizations, and comparative frameworks presented in this paper were developed specifically for educational purposes. While every effort has been made to accurately represent the underlying technologies, readers are encouraged to consult primary sources and official documentation for implementation details.
+
+\vspace{0.5cm}
+
+\noindent
+The field of AI-native cryptography is rapidly evolving. Information presented reflects the state of knowledge as of October 2025. Readers should verify current developments through official channels and recent publications. The author welcomes corrections, clarifications, and constructive feedback to improve the accuracy and completeness of this analysis.
+
+\vspace{0.5cm}
+
+\noindent
+This paper analyzes publicly available information including Academic preprints from IACR ePrint Archive and arXiv, Open-source code repositories on GitHub, Official protocol documentation and whitepapers, Verified investor announcements and media coverage, Technical benchmarks and performance evaluations.Where technical details remain unpublished or verification is limited, this paper clearly identifies such limitations and distinguishes between confirmed implementations, claimed capabilities, and theoretical projections.
+
+
+\vspace{1.5cm}
+
+\begin{center}
+\textit{This work is provided for educational and research purposes under principles of academic fair use and technological analysis.}
+\end{center}
+
+\end{document}
