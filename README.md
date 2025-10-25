@@ -6,7 +6,7 @@ This repository contains the source files and compiled paper for **"Trusted Exec
 ---
 
 ## Repository Overview
-
+```
 trusted-execution-environments-for-decentralized-ai/
 ├── Compiled/
 │   └── Trusted_Execution_Environments_for_Decentralized_AI.pdf     # Final compiled paper
@@ -30,7 +30,7 @@ trusted-execution-environments-for-decentralized-ai/
 │   ├── main.tex                                                     # Master LaTeX file for compilation
 │
 └── README.md
-
+```
 
 ## 📚 Citation
 
