@@ -1,0 +1,174 @@
+\section{Trusted Execution Environment Fundamentals}
+
+Trusted Execution Environments represent a fundamental shift in computing security architecture by moving the trust boundary from software-based access controls into hardware-enforced isolation mechanisms. Traditional security models rely on operating system kernels, hypervisors, or other privileged software components to enforce access controls and protect sensitive data. These software-based security perimeters remain vulnerable to exploitation through kernel vulnerabilities, privileged malware, or compromised system administrators with root access. TEE technology addresses these limitations by creating isolated execution environments within the processor itself, where even privileged software cannot access protected code and data.
+
+The core principle underlying TEE architectures involves hardware-based memory encryption and isolation that operates independently of the software stack. Modern processors include dedicated security subsystems that manage cryptographic keys, enforce memory access policies, and provide attestation capabilities. These hardware features create secure enclaves where applications can execute with strong confidentiality and integrity guarantees even when the underlying operating system or hypervisor has been compromised. The shift from software-defined to hardware-enforced security boundaries fundamentally changes the threat model for sensitive computation.
+
+\subsection{Core Concepts and Security Guarantees}
+
+A Trusted Execution Environment provides a secure area within a main processor that protects code and data with respect to confidentiality and integrity. Confidentiality ensures that unauthorized entities cannot read data stored within or processed by the secure environment. This property protects sensitive information including cryptographic keys, personal data, proprietary algorithms, and AI model weights from observation by privileged software or co-located processes. Integrity guarantees prevent unauthorized entities from modifying code executing within the secure environment or tampering with data being processed. This property ensures that computation proceeds according to specified logic without manipulation by external actors.
+
+These security guarantees derive from several hardware-level mechanisms working in concert. Memory encryption ensures that data stored in DRAM appears as ciphertext to any observer outside the secure enclave. The processor automatically encrypts data when writing to memory and decrypts when reading, using keys that exist only within the processor security subsystem. This encryption protects against physical attacks involving direct memory access, cold boot attacks where DRAM contents are extracted after power loss, and attacks by malicious operating systems attempting to read enclave memory.
+
+Hardware-enforced isolation prevents code executing outside the enclave from accessing enclave memory regions. The processor's memory management unit includes additional logic that checks every memory access against enclave boundaries, generating faults if unauthorized access is attempted. This isolation operates at a lower level than operating system page tables, ensuring that even kernel code with maximum privileges cannot override the access controls. The hardware enforces these boundaries regardless of software configuration, providing security guarantees independent of operating system trustworthiness.
+
+Cryptographic attestation mechanisms enable remote parties to verify the identity and integrity of code executing within a secure enclave. The processor includes a hardware root of trust that signs attestation reports containing measurements of the enclave code and configuration. These measurements are cryptographic hashes computed by hardware during enclave initialization, creating an unforgeable record of what code was loaded. Remote parties can verify these attestation reports using the processor manufacturer's public key infrastructure, establishing trust in the enclave without requiring trust in the machine owner or system administrator.
+
+Sealed storage capabilities allow enclaves to persist data across restarts while maintaining confidentiality. Data encrypted and integrity-protected using hardware-derived keys can only be decrypted by the same enclave code running on the same processor. This binding of encrypted data to specific code and hardware prevents unauthorized access even if the encrypted blob is copied to another system. Sealed storage enables enclaves to maintain persistent state including cryptographic keys, configuration data, or cached results without exposing sensitive information.
+
+Remote attestation represents perhaps the most critical capability for decentralized systems. The attestation process involves the enclave requesting the processor security subsystem to generate a signed report containing measurements of the enclave state. These measurements typically include cryptographic hashes of the loaded code, configuration parameters, and optionally application-specific data. The processor signs this report using a private key protected within the hardware security module, producing an attestation document that remote parties can verify using the corresponding public key. This mechanism enables distributed systems to establish trust without pre-existing relationships between parties.
+
+\subsection{Threat Model and Trust Boundaries}
+
+Understanding the security guarantees provided by TEE technology requires precise specification of the threat model defining which components are trusted and which are considered potentially adversarial. The trust boundary in TEE systems divides the computing stack into trusted and untrusted domains with fundamentally different security assumptions.
+
+The trusted computing base for TEE systems includes the processor hardware itself, specifically the security subsystems responsible for memory encryption, isolation enforcement, and attestation. The TEE firmware or microcode that implements these security functions is also within the trust boundary, as vulnerabilities in this low-level code could compromise the entire security model. The specific code and data loaded into the secure enclave are trusted by definition, as the attestation mechanism allows remote parties to verify exactly what code is executing. For some TEE implementations, certain initialization and management components provided by the processor manufacturer are also trusted.
+
+The untrusted domain includes the operating system kernel, which in traditional security models holds ultimate authority over the system. In TEE architectures, the kernel cannot access enclave memory or tamper with enclave execution, but it retains control over scheduling, resource allocation, and input/output operations. This creates an adversarial relationship where the enclave must assume that the kernel may attempt to attack it through side channels, denial of service, or manipulation of external interfaces. Hypervisors in virtualized environments are similarly untrusted, as are all other applications running on the system.
+
+Physical attacks occupy a nuanced position in the threat model. TEE technology provides strong protection against software-based attacks but offers varying levels of resistance to physical attacks. Memory encryption protects against passive observation of DRAM contents through bus snooping or physical removal of memory modules. However, sophisticated physical attacks involving invasive techniques such as decapping the processor, microscopic examination, or fault injection may be able to extract secrets or compromise execution. Most TEE threat models exclude such attacks based on the assumption that they require specialized equipment, significant expertise, and physical access for extended periods, making them impractical for most adversaries.
+
+Side channel attacks represent a particularly challenging category within the threat model. These attacks exploit physical characteristics of computation such as power consumption, electromagnetic emanation, or timing variations to infer information about secret data being processed. Cache timing attacks have proven particularly effective against TEE implementations, as the cache hierarchy typically exists outside the security boundary and its state can be observed by untrusted code. Speculative execution vulnerabilities such as Spectre and Meltdown have demonstrated that microarchitectural optimizations in modern processors can leak information across security boundaries. TEE vendors have implemented various countermeasures including cache partitioning, speculative execution barriers, and constant-time algorithms, but side channel resistance remains an ongoing challenge.
+
+Network-based attacks are generally outside the TEE security model, as network communication occurs through untrusted system components. The operating system controls network interfaces and can observe, modify, or block network traffic. TEE applications must implement end-to-end encryption for network communication, typically establishing secure channels using public keys included in attestation documents. The TEE protects the cryptographic operations and key material used for this encryption but cannot prevent network-level attacks such as denial of service or traffic analysis.
+
+The threat model for decentralized AI systems built on TEE technology inherits these boundaries while adding domain-specific considerations. An adversarial node operator is assumed to have complete control over the physical machine, operating system, and all software outside the enclave. This adversary can observe all input/output traffic, manipulate system resources, and potentially mount side channel attacks. However, the adversary cannot directly read enclave memory containing model weights or input data, cannot modify the AI inference code executing within the enclave, and cannot forge attestation reports that would cause remote parties to trust compromised code. The security analysis must carefully consider which attacks remain possible within these constraints and how system design can mitigate residual risks.
+
+\subsection{TEE Architecture Paradigms}
+
+Modern TEE implementations follow two distinct architectural paradigms that reflect different design philosophies and use case priorities. These paradigms differ fundamentally in their isolation granularity, resource constraints, performance characteristics, and deployment models. Understanding these architectural differences is essential for selecting appropriate TEE technology for specific applications.
+
+Process-based TEE architectures create isolated secure enclaves within individual processes, protecting specific code and data while allowing the rest of the application to execute normally outside the enclave. Intel Software Guard Extensions represents the canonical implementation of this paradigm. In this model, developers partition their application into trusted components that execute within the enclave and untrusted components that execute outside. The enclave typically contains only security-critical operations such as cryptographic key usage, sensitive data processing, or proprietary algorithms. The untrusted portion handles user interface, networking, and other operations that do not require confidentiality protection.
+
+The primary advantage of process-based TEEs lies in their small trusted computing base. By including only essential code within the enclave, the attack surface is minimized and security analysis becomes more tractable. The reduced code size also enables formal verification techniques that would be impractical for larger software systems. Process-based enclaves can coexist with multiple other enclaves on the same system, enabling fine-grained isolation between different security domains.
+
+However, process-based architectures impose significant constraints. The protected memory region, called the Enclave Page Cache in Intel SGX, is severely limited in size, typically ranging from 128 megabytes to 256 megabytes depending on the processor model. This memory constraint makes process-based TEEs unsuitable for applications requiring large working sets such as in-memory databases or large language model inference. Applications must be carefully designed to fit within these limits, often requiring significant refactoring to partition code appropriately. The small trusted computing base requirement means that standard libraries and operating system APIs are generally unavailable within the enclave, necessitating specialized development frameworks.
+
+Virtual machine-based TEE architectures take a fundamentally different approach by encrypting and isolating entire virtual machines. Implementations including AMD Secure Encrypted Virtualization, Intel Trust Domain Extensions, and AWS Nitro Enclaves follow this paradigm. Rather than requiring application modification to partition code, VM-based TEEs allow unmodified applications to execute within the protected environment. The entire guest operating system, system libraries, and application code run within the encrypted memory region.
+
+This lift-and-shift deployment model significantly reduces the engineering effort required to adapt existing applications to TEE environments. Developers can containerize or virtualize their applications using standard techniques and deploy them within the TEE without code changes. The larger memory allocation available to VM-based TEEs, typically measured in gigabytes rather than megabytes, accommodates applications with substantial memory requirements including large AI models. The ability to use standard operating system facilities and libraries simplifies development compared to the constrained environment of process-based enclaves.
+
+The trade-off for this convenience involves a larger trusted computing base. VM-based TEEs must trust the guest operating system kernel, system libraries, and potentially other software layers within the encrypted virtual machine. Vulnerabilities in any of these components could compromise the security of the entire environment. The larger code base makes comprehensive security auditing more challenging and increases the attack surface for potential exploits. From a security purist perspective, VM-based architectures represent a weaker security model compared to the minimal trusted computing base of process-based enclaves.
+
+Performance characteristics differ significantly between these paradigms. Process-based TEEs excel at CPU-intensive workloads where the limited memory does not pose a constraint. Cryptographic operations, mathematical computations, and other processing-bound tasks execute efficiently within small enclaves. However, memory-intensive applications suffer dramatically from the Enclave Page Cache limitations, as frequent swapping between encrypted and unencrypted memory regions introduces severe overhead. Input/output operations must cross the enclave boundary, adding latency and complexity to data transfer operations.
+
+VM-based TEEs demonstrate superior performance for memory-intensive workloads due to their ability to encrypt large memory regions without artificial size limits. The entire virtual machine's memory can be encrypted, allowing applications to use memory naturally. Input/output operations can be handled by the guest operating system within the encrypted environment, reducing boundary crossings. However, the encryption and decryption overhead for memory accesses introduces measurable performance impact compared to native execution, typically ranging from 5 to 20 percent depending on the workload characteristics.
+
+For decentralized AI applications, these architectural trade-offs have direct implications. Process-based TEEs prove suitable for small model inference or cryptographic operations on model weights, but struggle with large language models exceeding the Enclave Page Cache limits. VM-based TEEs accommodate larger models more naturally but require trust in the guest operating system and carry higher computational overhead. The choice between paradigms depends on model size, performance requirements, and acceptable trust assumptions for the specific deployment scenario.
+
+\subsection{Technology Landscape and Implementation Comparison}
+
+The TEE technology landscape includes multiple implementations from different processor manufacturers, each with distinct capabilities, limitations, and maturity levels. Understanding the specific characteristics of each implementation is essential for making informed architecture decisions.
+
+Intel Software Guard Extensions pioneered the process-based TEE paradigm when it was introduced in 2015 with Skylake processors. SGX provides hardware-isolated enclaves with cryptographically measured initialization and remote attestation capabilities. The technology has evolved through multiple generations, with SGX2 adding dynamic memory management and additional instructions for improved usability. However, the fundamental Enclave Page Cache limitation remains, constraining secure memory to 128 megabytes in most consumer processors and up to 256 megabytes in some server SKUs.
+
+SGX attestation originally relied on the Enhanced Privacy ID protocol, which enabled anonymous attestation but depended on Intel operating attestation services. The Data Center Attestation Primitives architecture introduced with later SGX versions moved to a more decentralized model using standard X.509 certificate chains, improving scalability and reducing dependence on Intel infrastructure. Despite these improvements, Intel has deprecated SGX in consumer processors starting with 12th generation Core processors, though it remains available in Xeon server processors targeted at cloud and enterprise deployments.
+
+The security track record of SGX includes several significant vulnerabilities discovered through academic research. The Foreshadow attack demonstrated that speculative execution could leak data from enclaves through cache side channels. Various other cache timing attacks have shown that the shared cache hierarchy creates opportunities for information leakage. Intel has released microcode updates and guidance for mitigation, but the fundamental tension between performance optimization through caching and security through isolation remains challenging to resolve completely.
+
+AMD Secure Encrypted Virtualization represents a VM-based TEE implementation integrated into EPYC server processors. SEV encrypts the memory of individual virtual machines using keys managed by the processor's security processor. The evolution from SEV to SEV-ES added encryption of register state during context switches, preventing leakage of sensitive data through register inspection. SEV-SNP further enhanced security by adding integrity protection through memory encryption trees, protecting against replay attacks and physical memory remapping.
+
+\begin{table}[htbp]
+\centering
+\caption{Comprehensive Comparison of TEE Implementations for AI Workloads}
+\label{tab:tee-comparison}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+\textbf{Feature} & \textbf{Intel SGX} & \textbf{AMD SEV-SNP} & \textbf{Intel TDX} & \textbf{AWS Nitro} & \textbf{ARM TrustZone} \\
+\midrule
+\multicolumn{6}{l}{\textit{Architecture \& Isolation}} \\
+\midrule
+Architecture Type & Process-based & VM-based & VM-based & Hypervisor-based & Process-based \\
+Isolation Granularity & Application & Full VM & Trust Domain & Enclave VM & Secure World \\
+Memory Encryption & AES-128 GCM & AES-128/256 & AES-128 XTS & AES-256 & Optional \\
+Trusted Computing Base & Minimal & Guest OS + App & Guest OS + App & Nitro + Guest & TEE OS + App \\
+\midrule
+\multicolumn{6}{l}{\textit{Memory \& Performance}} \\
+\midrule
+Encrypted Memory Size & 128-256 MB (EPC) & Up to 512 GB & Up to 512 GB & Instance-dependent & Device-dependent \\
+Memory Overhead & 5-10\% (in EPC) & 5-15\% & 5-12\% & 10-25\% & 2-8\% \\
+CPU Overhead & 2-5\% (no swap) & 10-15\% & 8-14\% & 10-20\% & 5-10\% \\
+Peak Performance Loss & 74\% (mem-bound) & 15-20\% & 12-18\% & 15-25\% & 10-15\% \\
+Suitable Model Sizes & $<$1B params & 7-70B params & 7-70B params & 7-70B params & $<$3B params \\
+\midrule
+\multicolumn{6}{l}{\textit{Attestation \& Security}} \\
+\midrule
+Attestation Protocol & DCAP/EPID & SEV-SNP Reports & TDX Reports & Nitro Documents & Platform-specific \\
+Signature Algorithm & ECDSA P-256 & ECDSA P-384 & ECDSA P-384 & ECDSA P-384 & RSA/ECDSA \\
+Certificate Validity & 30 days & Variable & Variable & 3 hours & Variable \\
+Root of Trust & Intel HW & AMD PSP & Intel MCHECK & AWS Infrastructure & ARM TrustZone \\
+Side Channel Resistance & Moderate & Good & Good & Good & Moderate \\
+Known Vulnerabilities & Foreshadow, Spectre & Limited & Minimal (new) & PCR weaknesses & Implementation-dep \\
+\midrule
+\multicolumn{6}{l}{\textit{Deployment \& Ecosystem}} \\
+\midrule
+Cloud Availability & Azure, Alibaba & Azure, GCP & Limited (2024+) & AWS only & Device-specific \\
+Development Complexity & High (SDK req'd) & Low (lift-shift) & Low (lift-shift) & Medium (containers) & High \\
+Cost Premium & 15-30\% & 10-20\% & 15-25\% & 0\% (included) & N/A \\
+Network Isolation & No & Optional & Optional & Mandatory (vsock) & No \\
+External Accelerators & Limited & Limited & Limited & None & Yes \\
+Open Source Support & Gramine, Occlum & QEMU/KVM & Limited & Nitro CLI & OP-TEE \\
+\midrule
+\multicolumn{6}{l}{\textit{AI-Specific Considerations}} \\
+\midrule
+7B Model (INT8) & \ding{55} No & \ding{51} Yes & \ding{51} Yes & \ding{51} Yes & \ding{55} No \\
+13B Model (INT8) & \ding{55} No & \ding{51} Yes & \ding{51} Yes & \ding{51} Yes & \ding{55} No \\
+70B Model (INT8) & \ding{55} No & \ding{51} Challenging & \ding{51} Challenging & \ding{51} Challenging & \ding{55} No \\
+Quantization Support & FP32, INT8 & All formats & All formats & All formats & FP16, INT8 \\
+Batch Processing & Limited & Good & Good & Good & Limited \\
+Multi-GPU Support & No & Experimental & Experimental & No & Device-dep \\
+\midrule
+\multicolumn{6}{l}{\textit{Decentralization Fit}} \\
+\midrule
+Trust Centralization & Intel & AMD & Intel & AWS (high) & ARM \\
+Multi-Cloud Support & Good & Good & Limited & None & N/A \\
+Vendor Lock-in Risk & Moderate & Moderate & Moderate & High & Moderate \\
+Community Adoption & High & Growing & Emerging & Growing & Moderate \\
+Production Maturity & Mature & Mature & Early & Mature & Mature \\
+\bottomrule
+\end{tabular}
+}
+\begin{tablenotes}
+\small
+\item Note: Performance metrics based on published benchmarks [3, 5, 6]. Model size compatibility assumes INT8 quantization with 4x memory multiplier for activations.
+\item \ding{51} = Supported; \ding{55} = Not recommended/supported
+\item EPC = Enclave Page Cache; PSP = Platform Security Processor; DCAP = Data Center Attestation Primitives
+\end{tablenotes}
+\end{table}
+
+The SEV architecture provides several advantages for cloud computing environments. Virtual machines can be encrypted transparently without guest operating system modifications, enabling protection of existing workloads. The memory encryption overhead has been measured at approximately 5 to 15 percent for typical workloads, representing acceptable performance trade-offs for security-sensitive applications. The attestation mechanism allows cloud tenants to verify their virtual machines are executing in encrypted mode before provisioning sensitive data.
+
+However, SEV's security model includes some notable limitations. The guest operating system remains part of the trusted computing base, so kernel vulnerabilities can compromise the protected environment. The attestation chain relies on AMD's platform security processor as the hardware root of trust, creating centralization similar to other TEE implementations. Academic research has identified potential vulnerabilities in memory controller operations and cache coherency protocols that could leak information in specific scenarios.
+
+Intel Trust Domain Extensions represents Intel's VM-based TEE offering designed to complement or potentially replace SGX for virtualized environments. TDX creates protected Trust Domains that are isolated virtual machines with encrypted memory and protected state. The technology leverages lessons learned from SGX to address some of its limitations while providing better performance for memory-intensive workloads. Multi-key total memory encryption allows different trust domains to use independent encryption keys, providing strong isolation between concurrent protected virtual machines.
+
+TDX attestation integrates with Intel's existing SGX attestation infrastructure, using similar certificate chains and measurement mechanisms adapted for the VM-based model. The technology supports larger memory allocations compared to SGX's Enclave Page Cache while maintaining stronger isolation compared to SEV's approach. However, TDX remains relatively new with limited deployment in production environments as of 2025, and its security properties have not yet undergone the extensive analysis and testing that SGX and SEV have received.
+
+AWS Nitro Enclaves occupies a unique position in the TEE landscape by implementing enclave capabilities at the hypervisor level rather than relying solely on processor features. The Nitro system is AWS's custom hypervisor technology that provides hardware-enforced isolation for EC2 instances. Nitro Enclaves extend this architecture to create isolated compute environments within existing EC2 instances, providing TEE-like capabilities without requiring specific processor features beyond standard virtualization extensions.
+
+The Nitro Enclaves architecture creates secure enclaves by allocating dedicated CPU cores and memory from the parent EC2 instance. These resources become inaccessible to the parent instance operating system and to AWS infrastructure software. The enclave has no external network connectivity, communicating only with the parent instance through a local socket connection. This network isolation provides strong security properties by eliminating entire classes of network-based attacks.
+
+Attestation in Nitro Enclaves uses Platform Configuration Registers that contain cryptographic measurements of the enclave image, kernel, application, and configuration. The Nitro Hypervisor signs attestation documents using keys managed by AWS, creating a certificate chain rooted in AWS infrastructure. This attestation model differs from processor-based TEEs where the hardware manufacturer provides the root of trust. The centralization of trust in AWS represents both a simplification and a potential concern depending on the threat model.
+
+The practical advantages of Nitro Enclaves for cloud-native applications include seamless integration with AWS services, no additional cost beyond standard EC2 pricing, and support across Intel, AMD, and AWS Graviton processors. The development workflow using container images simplifies application deployment compared to specialized enclave SDKs. However, the trust model requires confidence in AWS as both infrastructure provider and attestation authority, which may be acceptable for some applications but problematic for others requiring decentralized trust.
+
+Performance characteristics of Nitro Enclaves are generally favorable for AI workloads. The ability to allocate substantial memory, limited only by the parent instance size, accommodates large language models. The lack of external networking eliminates network performance concerns while simultaneously constraining communication patterns. Benchmark data indicates overhead in the range of 10 to 25 percent for typical workloads, competitive with other VM-based TEE implementations.
+
+\subsection{Selection Criteria for Decentralized AI}
+
+Choosing appropriate TEE technology for decentralized AI applications requires evaluating multiple factors against specific requirements and constraints. The decision involves technical considerations including performance, security properties, and operational characteristics, as well as strategic factors such as vendor dependencies and ecosystem maturity.
+
+Memory requirements represent the primary technical constraint. Large language models with billions of parameters require tens or hundreds of gigabytes of memory for model weights alone, before accounting for activation tensors and intermediate results during inference. Process-based TEEs like SGX become impractical for models exceeding a few billion parameters due to Enclave Page Cache limitations. VM-based TEEs including Nitro Enclaves, SEV-SNP, and TDX provide sufficient memory capacity for models in the 7 billion to 70 billion parameter range, though the largest models may still require specialized configurations or model sharding techniques.
+
+Performance overhead directly impacts the economic viability of decentralized AI services. Computational costs for AI inference already constrain profitability in competitive markets, and additional overhead from TEE mechanisms reduces margins further. Measurements indicate that VM-based TEEs impose 10 to 25 percent overhead for typical AI workloads, primarily from memory encryption operations. This overhead remains acceptable for applications where security and verifiability justify the cost, but rules out TEE adoption for extremely cost-sensitive use cases. Process-based TEEs can achieve lower overhead for CPU-bound operations but suffer severely for memory-intensive tasks.
+
+Security properties must align with the threat model for the specific deployment. Applications requiring minimal trusted computing base and formal verification support may prefer SGX despite its memory limitations. Systems accepting larger trusted computing bases in exchange for operational simplicity may choose VM-based TEEs. The specific threats considered include not only direct attacks on enclaves but also side channel vulnerabilities, denial of service vectors, and supply chain risks. Different TEE implementations have different vulnerability histories and mitigation strategies, influencing suitability for security-critical applications.
+
+Deployment complexity affects development costs and time to market. Technologies requiring extensive application refactoring and specialized development skills increase implementation effort. VM-based TEEs enabling lift-and-shift deployment reduce engineering costs but sacrifice some security properties. The availability of development tools, documentation, and community support influences the practical difficulty of building and maintaining TEE-based applications.
+
+Cloud provider integration determines whether TEE technology can be leveraged in existing cloud infrastructure or requires dedicated hardware deployment. Nitro Enclaves integrate seamlessly with AWS services, simplifying deployment for applications already using AWS. SEV and TDX require cloud providers to explicitly support these features, which may not be available across all instance types or regions. This consideration is particularly relevant for decentralized systems where node operators may prefer to use commodity cloud services rather than managing physical hardware.
+
+Vendor dependencies and trust centralization represent strategic considerations. Relying on a single cloud provider or processor manufacturer for attestation creates business risk if that vendor changes policies, increases prices, or experiences service disruptions. Decentralized systems may prefer supporting multiple TEE implementations to reduce dependence on any single vendor, though this approach increases technical complexity. The goal of true decentralization may be undermined if all nodes rely on the same attestation infrastructure even if they operate independently otherwise.
+
+For the Sentient Enclaves Framework, the selection of AWS Nitro Enclaves as the foundational platform reflects these trade-offs. The memory capacity of Nitro Enclaves accommodates language models in the practical range of 7 billion to 13 billion parameters after quantization. The performance overhead remains acceptable for inference workloads. The integration with AWS ecosystem services including Key Management Service simplifies key management and encryption operations. The operational simplicity of container-based deployment reduces development friction. However, this choice accepts AWS as a central trust point and limits initial deployment to AWS infrastructure, with potential future expansion to other TEE platforms to increase decentralization.
